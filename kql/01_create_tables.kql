@@ -1,0 +1,236 @@
+// =====================================================================
+// 01 - Schematy tabel Eventhouse / baza KQL: SchoolSafety
+// Scenariusz "Fala zagrozen szkolnych". Dane w 100% syntetyczne.
+// Tabele strumieniowe maja kolumny o nazwach pol JSON z symulatora,
+// bo destynacja Eventstream mapuje pola po nazwach.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// Strumienie (Eventstream -> tabele typowane)
+// ---------------------------------------------------------------------
+.create-merge table SchoolReport (
+    timestamp: datetime,
+    report_id: string,
+    bs_no: long,
+    school_id: string,
+    school_name: string,
+    county_code: string,
+    voivodeship_code: string,
+    lat: real,
+    lon: real,
+    category_code: string,
+    report_text: string,
+    link_url: string,
+    has_link: int,
+    sender_token_day: string,
+    client_class: string,
+    submit_latency_s: real,
+    ai_category_code: string,
+    ai_priority_code: string,
+    ai_score: real,
+    ai_signals: string,
+    ai_confidence: real,
+    ai_recipient_code: string
+)
+
+.create-merge table ReportUpdate (
+    timestamp: datetime,
+    report_id: string,
+    new_status: string,
+    duty_priority: string,
+    recipient_code: string,
+    actor: string,
+    voivodeship_code: string,
+    county_code: string
+)
+
+.create-merge table HotlineLoad (
+    timestamp: datetime,
+    voivodeship_code: string,
+    calls_112_total: long,
+    calls_112_school_related: long,
+    operators_on_duty: long,
+    load_ratio: real,
+    wait_p90_s: real,
+    abandoned_pct: real,
+    school_phone_calls: long
+)
+
+.create-merge table SocialSignal (
+    timestamp: datetime,
+    narrative_id: string,
+    narrative_name: string,
+    platform: string,
+    posts: long,
+    unique_accounts: long,
+    bot_score_mean: real,
+    new_account_share: real,
+    est_reach: long
+)
+
+.create-merge table DisorderEvent (
+    timestamp: datetime,
+    event_id: string,
+    school_id: string,
+    county_code: string,
+    voivodeship_code: string,
+    lat: real,
+    lon: real,
+    event_type: string,
+    est_participants: long,
+    police_required: int,
+    source: string
+)
+
+.alter-merge table SchoolReport policy retention softdelete = 30d
+.alter-merge table ReportUpdate policy retention softdelete = 30d
+.alter-merge table HotlineLoad policy retention softdelete = 30d
+.alter-merge table SocialSignal policy retention softdelete = 30d
+.alter-merge table DisorderEvent policy retention softdelete = 30d
+
+// ---------------------------------------------------------------------
+// Mapowania JSON (wsadowe ladowanie z OneLake: 05_load_eventhouse.py)
+// ---------------------------------------------------------------------
+.create-or-alter table SchoolReport ingestion json mapping "SchoolReportMapping"
+'[{"column":"timestamp","path":"$.timestamp","datatype":"datetime"},{"column":"report_id","path":"$.report_id","datatype":"string"},{"column":"bs_no","path":"$.bs_no","datatype":"long"},{"column":"school_id","path":"$.school_id","datatype":"string"},{"column":"school_name","path":"$.school_name","datatype":"string"},{"column":"county_code","path":"$.county_code","datatype":"string"},{"column":"voivodeship_code","path":"$.voivodeship_code","datatype":"string"},{"column":"lat","path":"$.lat","datatype":"real"},{"column":"lon","path":"$.lon","datatype":"real"},{"column":"category_code","path":"$.category_code","datatype":"string"},{"column":"report_text","path":"$.report_text","datatype":"string"},{"column":"link_url","path":"$.link_url","datatype":"string"},{"column":"has_link","path":"$.has_link","datatype":"int"},{"column":"sender_token_day","path":"$.sender_token_day","datatype":"string"},{"column":"client_class","path":"$.client_class","datatype":"string"},{"column":"submit_latency_s","path":"$.submit_latency_s","datatype":"real"},{"column":"ai_category_code","path":"$.ai_category_code","datatype":"string"},{"column":"ai_priority_code","path":"$.ai_priority_code","datatype":"string"},{"column":"ai_score","path":"$.ai_score","datatype":"real"},{"column":"ai_signals","path":"$.ai_signals","datatype":"string"},{"column":"ai_confidence","path":"$.ai_confidence","datatype":"real"},{"column":"ai_recipient_code","path":"$.ai_recipient_code","datatype":"string"}]'
+
+.create-or-alter table ReportUpdate ingestion json mapping "ReportUpdateMapping"
+'[{"column":"timestamp","path":"$.timestamp","datatype":"datetime"},{"column":"report_id","path":"$.report_id","datatype":"string"},{"column":"new_status","path":"$.new_status","datatype":"string"},{"column":"duty_priority","path":"$.duty_priority","datatype":"string"},{"column":"recipient_code","path":"$.recipient_code","datatype":"string"},{"column":"actor","path":"$.actor","datatype":"string"},{"column":"voivodeship_code","path":"$.voivodeship_code","datatype":"string"},{"column":"county_code","path":"$.county_code","datatype":"string"}]'
+
+.create-or-alter table HotlineLoad ingestion json mapping "HotlineLoadMapping"
+'[{"column":"timestamp","path":"$.timestamp","datatype":"datetime"},{"column":"voivodeship_code","path":"$.voivodeship_code","datatype":"string"},{"column":"calls_112_total","path":"$.calls_112_total","datatype":"long"},{"column":"calls_112_school_related","path":"$.calls_112_school_related","datatype":"long"},{"column":"operators_on_duty","path":"$.operators_on_duty","datatype":"long"},{"column":"load_ratio","path":"$.load_ratio","datatype":"real"},{"column":"wait_p90_s","path":"$.wait_p90_s","datatype":"real"},{"column":"abandoned_pct","path":"$.abandoned_pct","datatype":"real"},{"column":"school_phone_calls","path":"$.school_phone_calls","datatype":"long"}]'
+
+.create-or-alter table SocialSignal ingestion json mapping "SocialSignalMapping"
+'[{"column":"timestamp","path":"$.timestamp","datatype":"datetime"},{"column":"narrative_id","path":"$.narrative_id","datatype":"string"},{"column":"narrative_name","path":"$.narrative_name","datatype":"string"},{"column":"platform","path":"$.platform","datatype":"string"},{"column":"posts","path":"$.posts","datatype":"long"},{"column":"unique_accounts","path":"$.unique_accounts","datatype":"long"},{"column":"bot_score_mean","path":"$.bot_score_mean","datatype":"real"},{"column":"new_account_share","path":"$.new_account_share","datatype":"real"},{"column":"est_reach","path":"$.est_reach","datatype":"long"}]'
+
+.create-or-alter table DisorderEvent ingestion json mapping "DisorderEventMapping"
+'[{"column":"timestamp","path":"$.timestamp","datatype":"datetime"},{"column":"event_id","path":"$.event_id","datatype":"string"},{"column":"school_id","path":"$.school_id","datatype":"string"},{"column":"county_code","path":"$.county_code","datatype":"string"},{"column":"voivodeship_code","path":"$.voivodeship_code","datatype":"string"},{"column":"lat","path":"$.lat","datatype":"real"},{"column":"lon","path":"$.lon","datatype":"real"},{"column":"event_type","path":"$.event_type","datatype":"string"},{"column":"est_participants","path":"$.est_participants","datatype":"long"},{"column":"police_required","path":"$.police_required","datatype":"int"},{"column":"source","path":"$.source","datatype":"string"}]'
+
+// ---------------------------------------------------------------------
+// Wymiary (CSV z OneLake)
+// ---------------------------------------------------------------------
+.create-merge table DimVoivodeship (
+    voivodeship_code: string,
+    voivodeship_name: string,
+    population: long,
+    seat: string,
+    lat: real,
+    lon: real,
+    duty_center_in_app_today: int
+)
+
+.create-merge table DimCounty (
+    county_code: string,
+    county_name: string,
+    voivodeship_code: string,
+    population: long,
+    area_km2: real,
+    lat: real,
+    lon: real,
+    is_seat_city: int
+)
+
+.create-merge table DimSchool (
+    school_id: string,
+    school_name: string,
+    school_type: string,
+    municipality_code: string,
+    county_code: string,
+    voivodeship_code: string,
+    locality_name: string,
+    students: long,
+    lat: real,
+    lon: real
+)
+
+.create-merge table DimRecipient (
+    recipient_code: string,
+    recipient_name: string,
+    level: string,
+    ministry_division: string
+)
+
+.create-merge table DimReportCategory (
+    category_code: string,
+    category_name: string,
+    tile_order: int
+)
+
+.create-merge table DimPriority (
+    priority_code: string,
+    priority_name: string,
+    rank: int,
+    color: string
+)
+
+// ---------------------------------------------------------------------
+// Wyniki analiz z notatnikow (CSV z OneLake)
+// ---------------------------------------------------------------------
+.create-merge table CampaignReportFlags (
+    report_id: string,
+    cluster_id: long,
+    in_coordinated_cluster: int,
+    guard_text: bool,
+    sim_to_centroid: real,
+    keep_for_human: int,
+    campaign_flag: int,
+    suppressed_from_queue: int
+)
+
+.create-merge table CampaignClusters (
+    cluster: long,
+    size: long,
+    counties: long,
+    voivodeships: long,
+    schools: long,
+    span_h: real,
+    reports_per_hour: real,
+    repeated_link_share: real,
+    repeated_token_share: real,
+    automated_client_share: real,
+    median_latency_s: real,
+    first_ts: datetime,
+    last_ts: datetime,
+    top_truth: string,
+    truth_purity: real,
+    coordinated: bool
+)
+
+.create-merge table KizsVoivodeshipHourly (
+    hour: datetime,
+    voivodeship_code: string,
+    c_signals: real,
+    c_campaign: real,
+    c_hotline: real,
+    c_backlog: real,
+    c_disorder: real,
+    kizs: real,
+    voivodeship_name: string
+)
+
+.create-merge table KizsNationalHourly (
+    hour: datetime,
+    campaign_24h: long,
+    campaign_voivodeships_24h: long,
+    genuine_critical_24h: long,
+    voivodeships_112_over_1_5: long,
+    disorder_24h: long,
+    kizs_national_mean: real,
+    kizs_max_voiv: real,
+    voivodeships_kizs_ge_threshold: long,
+    rec_minister: bool,
+    rec_rzzk: bool,
+    rec_voivode_any: bool
+)
+
+.create-merge table EscalationEvent (
+    escalation_id: string,
+    timestamp: datetime,
+    level: string,
+    scope: string,
+    decision_type: string,
+    actor_role: string,
+    description: string,
+    source: string,
+    event_id: string
+)

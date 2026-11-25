@@ -1,0 +1,23 @@
+{
+  "schools": 4215,
+  "reports": 4560,
+  "report_updates": 13565,
+  "handoffs": 5386,
+  "hotline_rows": 16896,
+  "social_rows": 1547,
+  "disorder_events": 263,
+  "patrol_rows": 4180,
+  "support_rows": 1140,
+  "task_rows": 45,
+  "readiness_rows": 7,
+  "by_label": {
+    "background": 1771,
+    "k1_bomb_bot": 953,
+    "k2_clip_bot": 650,
+    "k2_clip_organic": 850,
+    "k3_copycat": 320,
+    "real_critical_wave": 16
+  },
+  "first_bs": "BS-2770",
+  "last_bs": "BS-7329"
+}

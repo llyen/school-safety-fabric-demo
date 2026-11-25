@@ -1,0 +1,127 @@
+// =====================================================================
+// 03 - Zapytania Real-Time Dashboard "Pulpit krajowy szkol"
+// Kazde zapytanie odpowiada jednemu kaflowi. Parametry dashboardu:
+//   _startTime, _endTime (suwak czasu), _voivodeship (multi-select)
+// Linia "// --- KAFEL n: tytul" rozpoczyna kafel i jest jego tytulem.
+// =====================================================================
+
+// --- KAFEL 1: wskazniki krajowe ---------------------------------------
+let _end = WindowEnd(_startTime, _endTime);
+let _r = ReportsAt(_end) | where timestamp > _end - 24h
+    | where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship);
+union
+    (_r | summarize wartosc = todouble(count()) | extend wskaznik = "Zgloszenia w ostatnich 24 h"),
+    (_r | where status != "ZAMKNIETE" | summarize wartosc = todouble(count()) | extend wskaznik = "Otwarte"),
+    (_r | where ai_priority_code == "KRYTYCZNY" | summarize wartosc = todouble(count()) | extend wskaznik = "Krytyczne wg AI"),
+    (_r | where status == "NOWE" | summarize wartosc = todouble(count()) | extend wskaznik = "Bez decyzji dyzurnego")
+| project wskaznik, wartosc
+
+// --- KAFEL 2: mapa otwartych zgloszen (kolor = priorytet) -------------
+let _end = WindowEnd(_startTime, _endTime);
+OpenReports(_end, 12)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| project lat, lon, school_name, bs_no, effective_priority, status, wait_min
+| take 5000
+
+// --- KAFEL 3: kolejka dyzurnego ---------------------------------------
+let _end = WindowEnd(_startTime, _endTime);
+OpenReports(_end, 12)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| extend nr = strcat("BS-", bs_no),
+       ai = strcat("AI: ", ai_priority_code),
+       decyzja = iff(isnotempty(duty_priority), strcat("DECYZJA: ", duty_priority), "brak decyzji")
+| project timestamp, nr, school_name, status, ai, decyzja, wait_min
+| order by wait_min desc
+| take 50
+
+// --- KAFEL 4: tempo naplywu zgloszen (30 min) -------------------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+SchoolReport
+| where timestamp between (_s .. _e)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| summarize zgloszenia = count() by bin(timestamp, 30m)
+| render timechart
+
+// --- KAFEL 5: anomalie naplywu wg wojewodztwa -------------------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+InflowAnomalies(_s, _e, 30m, 2.0)
+| join kind=leftouter DimVoivodeship on voivodeship_code
+| project timestamp, wojewodztwo = voivodeship_name, n, baseline, score
+| order by score desc
+| take 40
+
+// --- KAFEL 6: kandydaci na kampanie (klastry) -------------------------
+let _e = WindowEnd(_startTime, _endTime);
+ClusterCandidates(_e - 48h, _e)
+| project podstawa = basis, rozmiar = size, powiaty = counties, wojewodztwa = voivodeships,
+          pierwsze = first_ts, ostatnie = last_ts, udzial_automatow = automated_share, przyklad = sample_text
+| take 20
+
+// --- KAFEL 7: obciazenie 112 wg wojewodztwa ---------------------------
+let _e = WindowEnd(_startTime, _endTime);
+HotlineLoad
+| where timestamp between (_e - 6h .. _e)
+| summarize obciazenie_max = max(load_ratio), oczekiwanie_p90_s = max(wait_p90_s), porzucone_pct = max(abandoned_pct) by voivodeship_code
+| join kind=leftouter DimVoivodeship on voivodeship_code
+| project wojewodztwo = voivodeship_name, obciazenie_max, oczekiwanie_p90_s, porzucone_pct
+| order by obciazenie_max desc
+
+// --- KAFEL 8: obciazenie 112 w czasie ---------------------------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+HotlineLoad
+| where timestamp between (_s .. _e)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| summarize obciazenie = max(load_ratio) by bin(timestamp, 30m)
+| render timechart
+
+// --- KAFEL 9: kampanie w mediach spolecznosciowych --------------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+SocialSignal
+| where timestamp between (_s .. _e)
+| summarize posty = sum(posts), konta = sum(unique_accounts), zasieg = sum(est_reach), bot_score = round(avg(bot_score_mean), 2) by narrative_name, platform
+| order by zasieg desc
+
+// --- KAFEL 10: czas do decyzji i przekazania --------------------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+HandoffTimes(_s, _e)
+| summarize mediana_do_decyzji_min = round(percentile(to_decision_min, 50), 1),
+            p90_do_decyzji_min = round(percentile(to_decision_min, 90), 1),
+            mediana_do_przekazania_min = round(percentile(to_handoff_min, 50), 1)
+            by ai_priority_code
+
+// --- KAFEL 11: rekomendacja eskalacji ---------------------------------
+let _e = WindowEnd(_startTime, _endTime);
+EscalationState(_e)
+| project czas = at, kampania_24h = campaign_24h, wojewodztwa = campaign_voivodeships_24h,
+          realne_krytyczne = genuine_critical_24h, przeciazone_112 = voivodeships_112_over_1_5,
+          zdarzenia_Z18 = disorder_24h, rekomendacja = recommendation
+
+// --- KAFEL 12: Krajowy Indeks Zagrozenia Szkolnego (godzinowy) --------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+KizsVoivodeshipHourly
+| where hour between (_s .. _e)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| summarize kizs = max(kizs) by hour, voivodeship_name
+| render timechart
+
+// --- KAFEL 13: zdarzenia Z18 (odbieranie dzieci, blokady) -------------
+let _s = WindowStart(_startTime, _endTime);
+let _e = WindowEnd(_startTime, _endTime);
+DisorderEvent
+| where timestamp between (_s .. _e)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| summarize zdarzenia = count(), uczestnicy = sum(est_participants), wymaga_policji = sum(police_required) by event_type
+| order by zdarzenia desc
+
+// --- KAFEL 14: krytyczne bez decyzji powyzej 10 min -------------------
+let _e = WindowEnd(_startTime, _endTime);
+CriticalWithoutDecision(10, _e)
+| where isnull(_voivodeship) or array_length(_voivodeship) == 0 or voivodeship_code in (_voivodeship)
+| project timestamp, nr = report_id, school_name, ai_signals, wait_min
+| take 30

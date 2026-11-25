@@ -1,0 +1,7 @@
+truth_label,n,agreement,ai_critical,duty_critical,median_delay_min
+background,1771,0.878,64,67,2.2
+k1_bomb_bot,953,0.886,842,748,10.8
+k2_clip_bot,650,0.837,22,31,5.7
+k2_clip_organic,850,0.867,0,0,2.9
+k3_copycat,320,0.9,20,20,2.5
+real_critical_wave,16,1.0,10,10,7.55

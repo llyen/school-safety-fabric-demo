@@ -1,0 +1,7 @@
+escalation_id,timestamp,level,scope,decision_type,actor_role,description,source,event_id
+ESC-01,2026-10-07T15:40:00+02:00,powiat,Miasto M-1402,decyzja,starosta,"Powiatowy zespół zarządzania kryzysowego: pierwsze posiedzenie, nadzwyczajna weryfikacja alarmów",scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026
+ESC-02,2026-10-08T19:30:00+02:00,wojewoda,łódzkie,decyzja,wojewoda łódzki,Wojewódzki zespół zarządzania kryzysowego po incydencie w szkole w Mieście M-1001,scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026
+ESC-03,2026-10-09T03:50:00+02:00,wojewoda,mazowieckie,decyzja,wojewoda mazowiecki,Zwołanie WZZK: skoordynowane alarmy w kilkunastu powiatach,scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026
+ESC-04,2026-10-09T09:10:00+02:00,minister,MEN/MSWiA,decyzja,minister wiodący,Minister Edukacji Narodowej i MSWiA: wspólne stanowisko robocze,scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026
+ESC-05,2026-10-09T14:00:00+02:00,RZZK,kraj,decyzja,Premier / Dyrektor RCB,Zwołanie Rządowego Zespołu Zarządzania Kryzysowego (SPO-1) i Zespołu ds. Incydentów Krytycznych (SPO-16),scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026
+ESC-06,2026-10-13T12:00:00+02:00,RZZK,kraj,decyzja,Dyrektor RCB,"Zakończenie eskalacji: obniżenie poziomu reagowania, monitoring",scenariusz,FALA_ZAGROZEN_SZKOLNYCH_2026

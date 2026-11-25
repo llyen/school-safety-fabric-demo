@@ -1,0 +1,50 @@
+// Zapytania zrodlowe regul Data Activatora (activator/RULES.md).
+// Zapytanie zwraca wiersz wylacznie wtedy, gdy regula ma sie odpalic.
+// Kolumna `alert` = 1 to techniczny haczyk dla warunku liczbowego Activatora.
+// Parametr `at` to kotwica czasu scenariusza (ScenarioPeak() lub ScenarioNow()).
+
+// --- REGULA R1: Skok naplywu zgloszen w wojewodztwie
+.create-or-alter function ActivatorR1Inflow(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    InflowAnomalies(_at - 12h, _at, 30m, 2.0)
+    | where timestamp > _at - 90m and n >= 15
+    | join kind=leftouter DimVoivodeship on voivodeship_code
+    | summarize zgloszenia = max(n), baseline = max(baseline), score = max(score) by voivodeship_code, voivodeship_name
+    | project alert = 1, voivodeship_code, voivodeship_name, zgloszenia, baseline, score
+    | order by score desc
+}
+
+// --- REGULA R2: Wykryto klaster kampanii
+.create-or-alter function ActivatorR2Campaign(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    ClusterCandidates(_at - 6h, _at, 20, 8)
+    | where automated_share >= 0.3 or tokens_repeated >= 5
+    | project alert = 1, basis, key, size, counties, voivodeships, first_ts, last_ts, automated_share, sample_text
+    | order by size desc
+}
+
+// --- REGULA R3: Krytyczne zgloszenie bez decyzji dyzurnego dluzej niz 10 min
+.create-or-alter function ActivatorR3CriticalNoDecision(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    CriticalWithoutDecision(10, _at)
+    | take 20
+    | project alert = 1, report_id, school_name, voivodeship_code, county_code, ai_signals, wait_min
+}
+
+// --- REGULA R4: Przeciazenie 112
+.create-or-alter function ActivatorR4Hotline(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    HotlineOverload(_at, 30m, 1.5)
+    | join kind=leftouter DimVoivodeship on voivodeship_code
+    | project alert = 1, voivodeship_code, voivodeship_name, max_load_ratio, max_wait_p90_s, max_abandoned_pct, school_related_calls
+    | order by max_load_ratio desc
+}
+
+// --- REGULA R5: Kryterium eskalacji do RZZK
+.create-or-alter function ActivatorR5Escalation(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    EscalationState(_at)
+    | where rec_rzzk
+    | project alert = 1, at, campaign_24h, campaign_voivodeships_24h, genuine_critical_24h,
+              voivodeships_112_over_1_5, disorder_24h, recommendation
+}

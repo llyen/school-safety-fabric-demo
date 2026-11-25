@@ -1,0 +1,65 @@
+{
+  "reports": 4560,
+  "quality": {
+    "ai": {
+      "exact_match": 0.3026,
+      "within_one": 0.657,
+      "critical_precision": 0.0752,
+      "critical_recall": 0.6429,
+      "critical_predicted": 958,
+      "critical_true": 112
+    },
+    "duty": {
+      "exact_match": 0.3537,
+      "within_one": 0.6715,
+      "critical_precision": 0.0833,
+      "critical_recall": 0.6518,
+      "critical_predicted": 876,
+      "critical_true": 112
+    },
+    "lexicon": {
+      "exact_match": 0.4162,
+      "within_one": 0.7535,
+      "critical_precision": 1.0,
+      "critical_recall": 0.1071,
+      "critical_predicted": 12,
+      "critical_true": 112
+    },
+    "real_critical_in_wave": {
+      "n": 16,
+      "ai_critical_or_high": 16,
+      "ai_critical": 10,
+      "duty_critical_or_high": 16
+    }
+  },
+  "agreement": {
+    "agreement_all": 0.8737,
+    "duty_raised": 246,
+    "duty_lowered": 330,
+    "agreement_by_ai_priority": {
+      "NISKI": 0.9024,
+      "SREDNI": 0.8249,
+      "WYSOKI": 0.8563,
+      "KRYTYCZNY": 0.8904
+    }
+  },
+  "delay_all_median_min": 3.4,
+  "delay_all_p90_min": 181.02,
+  "d0_reports": 1736,
+  "d0_critical_by_duty": 493,
+  "d0_critical_median_delay_min": 35.7,
+  "d0_critical_share_over_10min": 0.6937,
+  "mazowieckie_d0_median_delay_min": 271.8,
+  "bs4826": {
+    "report_ts": "2026-10-09 08:41:17+02:00",
+    "decision_delay_min": "144.7",
+    "ai_priority_code": "KRYTYCZNY",
+    "duty_priority_code": "KRYTYCZNY",
+    "queue_len_at_decision_start": "370"
+  },
+  "real_critical_decision_delay_min": {
+    "median": 7.5,
+    "max": 586.4,
+    "over_60min": 5
+  }
+}

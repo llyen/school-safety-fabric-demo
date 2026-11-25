@@ -1,0 +1,29 @@
+.env
+config.json
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# Wyniki lokalnych prob symulatora
+datasets/derived/dry_run_*.jsonl
+
+# Artefakty posrednie wdrozenia (schematy Delta, wygenerowany model, definicje do podgladu)
+.fabric/schemas.json
+.fabric/model.bim
+.fabric/_*.json
+*.log
+*.pid
+
+node_modules/
+.env.*
+.fabric/
+# Local secrets, build state and deployment artifacts (not for publishing)
+.env
+.env.local
+rayfin/.env*
+rayfin/.deployments.json
+rayfin/.temp/
+*.tsbuildinfo
+*.log
+.fabric/deployment.json

@@ -1,0 +1,5 @@
+message_at,message_ts,disorder_events_after,police_required_events_after,school_related_112_calls_after,school_phone_calls_after,events_avoided_elasticity_10pct,events_avoided_elasticity_20pct,events_avoided_elasticity_30pct,calls_112_avoided_elasticity_10pct,calls_112_avoided_elasticity_20pct,calls_112_avoided_elasticity_30pct
+T+30 min,2026-10-09 06:32:08+02:00,263,130,14669,67183,26.3,52.6,78.9,1466.9,2933.8,4400.7
+T+2 h,2026-10-09 08:02:08+02:00,220,110,12111,63823,22.0,44.0,66.0,1211.1,2422.2,3633.3
+T+4 h,2026-10-09 10:02:08+02:00,126,69,7288,57700,12.6,25.2,37.8,728.8,1457.6,2186.4
+T+8 h,2026-10-09 14:02:08+02:00,18,8,3426,52004,1.8,3.6,5.4,342.6,685.2,1027.8

@@ -1,0 +1,5 @@
+priority_code,priority_name,rank,color
+NISKI,Niski,1,#15803d
+SREDNI,Średni,2,#a16207
+WYSOKI,Wysoki,3,#c2410c
+KRYTYCZNY,Krytyczny,4,#d5233f

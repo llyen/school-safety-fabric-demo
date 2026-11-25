@@ -1,0 +1,7 @@
+,median_delay_all_min,median_delay_kept_for_human_min,real_critical_wave_n,real_critical_wave_median_delay_min,real_critical_wave_max_delay_min,real_critical_wave_over_10min,real_critical_wave_over_60min,real_critical_all_n,real_critical_all_over_60min,ai_critical_kept_over_10min_share,mazowieckie_d0_median_delay_min,mazowieckie_d0_kept_median_delay_min,bs4826_delay_min
+A0_status_quo,3.4,2.3,16.0,9.7,607.5,7.0,5.0,112.0,7.0,0.1489,280.0,740.6,152.6
+A1_plus_1_duty_officer_day,3.2,2.3,16.0,9.7,442.0,7.0,5.0,112.0,6.0,0.1277,149.4,399.0,93.0
+A2_plus_2_duty_officers_day,3.1,2.2,16.0,9.7,344.1,7.0,4.0,112.0,5.0,0.117,83.5,259.0,58.4
+A3_qualification_30pct_faster,2.2,1.6,16.0,6.8,406.3,6.0,5.0,112.0,6.0,0.0638,122.8,349.5,83.4
+A4_campaign_aware_queue,6.6,2.2,16.0,5.1,7.3,0.0,0.0,112.0,0.0,0.0851,165.6,2.6,3.7
+A5_campaign_aware_plus_1_officer,6.6,2.2,16.0,5.1,7.3,0.0,0.0,112.0,0.0,0.0851,165.6,2.5,3.7

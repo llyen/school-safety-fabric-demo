@@ -1,0 +1,21 @@
+hazard_code,hazard_name,category,probability,probability_label,impact,impact_label,risk_score,risk_level,color,in_scenario,scenario_role
+Z01,Epidemia,społeczne,3,możliwe,5,katastrofalne,15,wysokie,czerwony,0,
+Z02,Powódź,naturalne,4,prawdopodobne,4,duże,16,wysokie,czerwony,0,
+Z03,Zakłócenie funkcjonowania systemów i sieci teleinformatycznych,techniczne,3,możliwe,4,duże,12,podwyższone,żółty,0,
+Z04,Działania hybrydowe,hybrydowe,3,możliwe,4,duże,12,podwyższone,żółty,1,kampania skoordynowanych fałszywych alarmów (działania hybrydowe)
+Z05,Susza/upał,naturalne,4,prawdopodobne,3,średnie,12,podwyższone,żółty,0,
+Z06,Epizootia,naturalne,4,prawdopodobne,3,średnie,12,podwyższone,żółty,0,
+Z07,Zakłócenie w systemie energetycznym,techniczne,4,prawdopodobne,3,średnie,12,podwyższone,żółty,0,
+Z08,Silny wiatr,naturalne,4,prawdopodobne,3,średnie,12,podwyższone,żółty,0,
+Z09,Zakłócenie w systemie paliwowym,techniczne,3,możliwe,3,średnie,9,podwyższone,żółty,0,
+Z10,Pożar wielkopowierzchniowy,naturalne,3,możliwe,3,średnie,9,podwyższone,żółty,0,
+Z11,Epifitoza,naturalne,3,możliwe,3,średnie,9,podwyższone,żółty,0,
+Z12,Zakłócenie funkcjonowania systemów i usług telekomunikacyjnych,techniczne,3,możliwe,3,średnie,9,podwyższone,żółty,1,przeciążenie 112 i telefonów szkół (opcjonalnie)
+Z13,Skażenie chemiczne na lądzie,techniczne,2,rzadkie,2,małe,4,niskie,zielony,0,
+Z14,Zakłócenie w systemie gazowym,techniczne,2,rzadkie,3,średnie,6,niskie,zielony,0,
+Z15,Katastrofa morska,techniczne,2,rzadkie,3,średnie,6,niskie,zielony,0,
+Z16,Zdarzenie o charakterze terrorystycznym,społeczne,1,bardzo rzadkie,4,duże,4,niskie,zielony,1,alarmy bombowe i realne groźby ataku
+Z17,Skażenie promieniotwórcze,techniczne,1,bardzo rzadkie,4,duże,4,niskie,zielony,0,
+Z18,Zbiorowe zakłócenie porządku publicznego,społeczne,4,prawdopodobne,2,małe,8,podwyższone,żółty,1,"panika, tłumne odbieranie dzieci, blokady dojazdów"
+Z19,Silny mróz/intensywne opady śniegu,naturalne,3,możliwe,2,małe,6,niskie,zielony,0,
+Z20,Dezinformacja,hybrydowe,3,możliwe,3,średnie,9,podwyższone,żółty,1,fałszywe nagrania zapowiedzi ataku w mediach społecznościowych

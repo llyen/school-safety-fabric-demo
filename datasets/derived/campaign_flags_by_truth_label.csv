@@ -1,0 +1,7 @@
+truth_label,n,flagged,suppressed,kept_for_human,flag_rate
+background,1771,0,0,1771,0.0
+k1_bomb_bot,953,953,953,0,1.0
+k2_clip_bot,650,650,650,0,1.0
+k2_clip_organic,850,613,613,237,0.7212
+k3_copycat,320,0,0,320,0.0
+real_critical_wave,16,0,0,16,0.0

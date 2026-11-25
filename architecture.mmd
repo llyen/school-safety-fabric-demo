@@ -1,0 +1,28 @@
+flowchart LR
+    subgraph APP["Aplikacja Power Apps do zgloszen szkolnych (istniejaca)"]
+        U[Widok ucznia] --> DV[(Dataverse)]
+        D[Centrum zgloszen, dyzurny] --> DV
+    end
+    subgraph SIM["Zasymulowane w demo"]
+        GEN[generate_datasets.py seed=42] --> SR[simulate_realtime.py]
+    end
+    DV -. opisana sciezka .-> FL[Fabric Link lub Synapse Link]
+    DV -. opisana sciezka .-> ES
+    SR --> ES[Eventstream es_school_reports]
+    GEN --> LH[(Lakehouse lh_school_safety)]
+    ES --> EH[(Eventhouse SchoolSafety)]
+    FL -.-> LH
+    LH --> NB[Notebooki 01 do 05]
+    NB --> LH
+    LH --> SM[Model semantyczny sm_school_safety]
+    SM --> RP[Raport rpt_zagrozenia_szkolne]
+    EH --> RTD[Real-Time Dashboard]
+    EH --> ACT[Activator, 5 regul]
+    LH --> AG[Data Agent]
+    EH --> AG
+    SM --> AG
+    GEN --> APPF[Fabric App Pulpit krajowy szkol, migawka datasets]
+    ACT --> TEAMS[Powiadomienie dla dyzurnego i RCB]
+    RP --> DEC[Decyzja czlowieka: eskalacja powiat, wojewoda, minister, RZZK]
+    RTD --> DEC
+    DEC -. zapis zwrotny, nie zbudowany .-> DV

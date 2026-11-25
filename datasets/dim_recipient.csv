@@ -1,0 +1,9 @@
+recipient_code,recipient_name,level,ministry_division
+POL,Policja,aplikacja,XIX
+DIR,Dyrekcja szkoły,aplikacja,XV
+PED,Pedagog/psycholog,aplikacja,XV
+DYZ,Dyżurnet.pl (NASK),aplikacja,X
+KUR,Kuratorium Oświaty,krajowy,XV
+MEN,Ministerstwo Edukacji Narodowej,krajowy,XV
+RCB,Rządowe Centrum Bezpieczeństwa,krajowy,I
+CSIRT,CSIRT NASK,krajowy,X

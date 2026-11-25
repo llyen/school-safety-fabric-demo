@@ -1,0 +1,205 @@
+// =====================================================================
+// 02 - Funkcje, widok materializowany i zegar scenariusza
+// Scenariusz "Fala zagrozen szkolnych". Logika detekcji w czasie rzeczywistym
+// jest uproszczona wzgledem notatnika 02 (TF-IDF): tu klaster to wzorzec jezykowy
+// albo wspolny link. Wyniki notatnika trafiaja do tabel CampaignReportFlags i CampaignClusters.
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// Zegar scenariusza. Dane maja znaczniki z pazdziernika 2026, a okno
+// dashboardu domyslnie siega "ostatniej godziny", dlatego kafle przelaczaja
+// sie na szczyt, gdy wybrany zakres nie pokrywa sie z danymi.
+// ---------------------------------------------------------------------
+.create-or-alter function ScenarioNow() {
+    toscalar(SchoolReport | summarize max(timestamp))
+}
+
+.create-or-alter function ScenarioStart() {
+    toscalar(SchoolReport | summarize min(timestamp))
+}
+
+.create-or-alter function ScenarioPeak() {
+    toscalar(
+        SchoolReport
+        | summarize n = count() by h = bin(timestamp, 1h)
+        | top 1 by n desc
+        | project h)
+}
+
+.create-or-alter function WindowEnd(from_time: datetime, to_time: datetime) {
+    iff(to_time < ScenarioStart() or from_time > ScenarioNow(), ScenarioPeak() + 2h, to_time)
+}
+
+.create-or-alter function WindowStart(from_time: datetime, to_time: datetime) {
+    iff(to_time < ScenarioStart() or from_time > ScenarioNow(),
+        ScenarioPeak() + 2h - (to_time - from_time), from_time)
+}
+
+// ---------------------------------------------------------------------
+// Czasy obslugi zgloszenia: decyzja dyzurnego, przekazanie, zamkniecie
+// ---------------------------------------------------------------------
+.create-or-alter function ReportTimes(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    ReportUpdate
+    | where timestamp <= _at
+    | summarize decision_ts = minif(timestamp, new_status == "W_ANALIZIE"),
+                handoff_ts = minif(timestamp, new_status == "PRZEKAZANE"),
+                closed_ts = minif(timestamp, new_status == "ZAMKNIETE"),
+                duty_priority = take_any(duty_priority),
+                recipient_code = take_any(recipient_code),
+                actor = take_any(actor)
+      by report_id
+}
+
+// Stan zgloszen w chwili `at`: status wynika z ostatniego zdarzenia
+.create-or-alter function ReportsAt(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    SchoolReport
+    | where timestamp <= _at
+    | join kind=leftouter ReportTimes(_at) on report_id
+    | extend status = case(isnotnull(closed_ts), "ZAMKNIETE",
+                           isnotnull(handoff_ts), "PRZEKAZANE",
+                           isnotnull(decision_ts), "W_ANALIZIE",
+                           "NOWE"),
+             duty_priority = coalesce(duty_priority, ""),
+             effective_priority = iff(isnotempty(duty_priority), duty_priority, ai_priority_code),
+             wait_min = round(datetime_diff('second', iff(isnotnull(decision_ts), decision_ts, _at), timestamp) / 60.0, 1)
+    | project-away report_id1
+}
+
+// Zgloszenia otwarte (bez statusu ZAMKNIETE) z ostatnich `hours` godzin
+.create-or-alter function OpenReports(at: datetime = datetime(null), hours: int = 48) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    ReportsAt(_at)
+    | where timestamp > _at - totimespan(hours * 1h) and status != "ZAMKNIETE"
+}
+
+// Zgloszenia z priorytetem AI KRYTYCZNY bez decyzji dyzurnego dluzej niz `minutes`.
+// Zgloszenia zakwalifikowane przez analize kampanii jako zbiorcze nie zalewaja listy.
+.create-or-alter function CriticalWithoutDecision(minutes: int = 10, at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    ReportsAt(_at)
+    | where ai_priority_code == "KRYTYCZNY" and status == "NOWE" and wait_min > minutes
+    | join kind=leftouter (CampaignReportFlags | project report_id, keep_for_human, campaign_flag) on report_id
+    | where coalesce(keep_for_human, 1) == 1
+    | project timestamp, report_id, school_name, voivodeship_code, county_code, category_code,
+              ai_priority_code, ai_signals, wait_min, report_text
+    | order by wait_min desc
+}
+
+// ---------------------------------------------------------------------
+// Wzorzec jezykowy zgloszenia: tekst bez szkoly, klasy, godziny i liczb
+// ---------------------------------------------------------------------
+.create-or-alter function ReportPattern(from_time: datetime, to_time: datetime) {
+    SchoolReport
+    | where timestamp between (from_time .. to_time)
+    | extend t = tolower(report_text)
+    | extend t = replace_string(t, tolower(school_name), "")
+    | extend t = replace_regex(t, @"https?://\S+", "URL")
+    | extend t = replace_regex(t, @"\d+:\d+", "GODZ")
+    | extend t = replace_regex(t, @"\d+[a-z]?", "#")
+    | extend t = trim(@"[\s\.,]+", t)
+    | extend pattern = substring(t, 0, 48),
+             link_key = iff(has_link == 1, replace_regex(link_url, @"^https?://", ""), "")
+}
+
+// Kandydaci na kampanie w oknie czasu: ten sam wzorzec jezykowy lub ten sam link
+// w wielu powiatach. To uproszczenie notatnika 02 (TF-IDF).
+.create-or-alter function ClusterCandidates(from_time: datetime, to_time: datetime, min_size: int = 20, min_counties: int = 8) {
+    let _r = ReportPattern(from_time, to_time);
+    union
+      (_r | summarize size = count(), counties = dcount(county_code), voivodeships = dcount(voivodeship_code),
+                      first_ts = min(timestamp), last_ts = max(timestamp), tokens_repeated = count() - dcount(sender_token_day),
+                      automated_share = round(1.0 * countif(client_class != "mobile_app") / count(), 3),
+                      median_latency_s = round(percentile(submit_latency_s, 50), 1),
+                      sample_text = take_any(report_text)
+             by key = pattern | extend basis = "wzorzec_jezykowy"),
+      (_r | where isnotempty(link_key)
+          | summarize size = count(), counties = dcount(county_code), voivodeships = dcount(voivodeship_code),
+                      first_ts = min(timestamp), last_ts = max(timestamp), tokens_repeated = count() - dcount(sender_token_day),
+                      automated_share = round(1.0 * countif(client_class != "mobile_app") / count(), 3),
+                      median_latency_s = round(percentile(submit_latency_s, 50), 1),
+                      sample_text = take_any(report_text)
+             by key = link_key | extend basis = "wspolny_link")
+    | where size >= min_size and counties >= min_counties
+    | order by size desc
+}
+
+// Zgloszenia nalezace do kandydatow na kampanie
+.create-or-alter function CampaignMembers(from_time: datetime, to_time: datetime) {
+    let _r = ReportPattern(from_time, to_time);
+    let _c = ClusterCandidates(from_time, to_time);
+    union
+      (_r | join kind=inner (_c | where basis == "wzorzec_jezykowy" | project pattern = key) on pattern),
+      (_r | where isnotempty(link_key) | join kind=inner (_c | where basis == "wspolny_link" | project link_key = key) on link_key)
+    | distinct report_id, timestamp, voivodeship_code, county_code, ai_priority_code, pattern, link_key
+}
+
+// ---------------------------------------------------------------------
+// Naplyw zgloszen i anomalie napływu na wojewodztwo
+// ---------------------------------------------------------------------
+.create-or-alter function InflowAnomalies(from_time: datetime, to_time: datetime, step: timespan = 30m, sensitivity: real = 2.0) {
+    SchoolReport
+    | where timestamp between (from_time .. to_time)
+    | make-series n = count() default = 0 on timestamp from from_time to to_time step step by voivodeship_code
+    | extend (anomaly, score, baseline) = series_decompose_anomalies(n, sensitivity, -1, 'linefit')
+    | mv-expand timestamp to typeof(datetime), n to typeof(long), anomaly to typeof(int), score to typeof(real), baseline to typeof(real)
+    | where anomaly == 1
+    | project timestamp, voivodeship_code, n, baseline = round(baseline, 1), score = round(score, 2)
+}
+
+// ---------------------------------------------------------------------
+// Obciazenie 112 i telefonow szkol
+// ---------------------------------------------------------------------
+.create-or-alter function HotlineOverload(at: datetime = datetime(null), window: timespan = 30m, threshold: real = 1.5) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    HotlineLoad
+    | where timestamp between (_at - window .. _at)
+    | summarize max_load_ratio = max(load_ratio), max_wait_p90_s = max(wait_p90_s), max_abandoned_pct = max(abandoned_pct),
+                school_related_calls = sum(calls_112_school_related), at_time = max(timestamp)
+      by voivodeship_code
+    | where max_load_ratio > threshold
+}
+
+// ---------------------------------------------------------------------
+// Kryterium eskalacji krajowej w chwili `at` (progi jak w notatniku 03)
+// ---------------------------------------------------------------------
+.create-or-alter function EscalationState(at: datetime = datetime(null)) {
+    let _at = iff(isnull(at), ScenarioNow(), at);
+    let _from = _at - 24h;
+    let _members = CampaignMembers(_from, _at);
+    let _campaign = toscalar(_members | summarize count());
+    let _camp_voiv = toscalar(_members | summarize dcount(voivodeship_code));
+    let _genuine = toscalar(
+        SchoolReport
+        | where timestamp between (_from .. _at) and ai_priority_code == "KRYTYCZNY"
+        | join kind=leftanti (_members | project report_id) on report_id
+        | summarize count());
+    let _overload = toscalar(
+        HotlineLoad
+        | where timestamp between (_at - 6h .. _at)
+        | summarize m = max(load_ratio) by voivodeship_code
+        | where m > 1.5
+        | count);
+    let _disorder = toscalar(DisorderEvent | where timestamp between (_from .. _at) | count);
+    print at = _at, campaign_24h = _campaign, campaign_voivodeships_24h = _camp_voiv,
+          genuine_critical_24h = _genuine, voivodeships_112_over_1_5 = _overload, disorder_24h = _disorder
+    | extend rec_minister = campaign_24h >= 150 and campaign_voivodeships_24h >= 8,
+             rec_rzzk = campaign_24h >= 400 and campaign_voivodeships_24h >= 12
+                        and (genuine_critical_24h >= 1 or voivodeships_112_over_1_5 >= 1 or disorder_24h >= 10),
+             recommendation = case(
+                 campaign_24h >= 400 and campaign_voivodeships_24h >= 12
+                     and (genuine_critical_24h >= 1 or voivodeships_112_over_1_5 >= 1 or disorder_24h >= 10), "RZZK",
+                 campaign_24h >= 150 and campaign_voivodeships_24h >= 8, "minister wiodacy (MEN/MSWiA)",
+                 "monitorowanie")
+}
+
+// ---------------------------------------------------------------------
+// Czasy do przekazania (percentyle) dla zakonczonych decyzji
+// ---------------------------------------------------------------------
+.create-or-alter function HandoffTimes(from_time: datetime, to_time: datetime) {
+    ReportsAt(to_time)
+    | where timestamp between (from_time .. to_time) and isnotnull(handoff_ts)
+    | extend to_decision_min = datetime_diff('second', decision_ts, timestamp) / 60.0,
+             to_handoff_min = datetime_diff('second', handoff_ts, timestamp) / 60.0
+}

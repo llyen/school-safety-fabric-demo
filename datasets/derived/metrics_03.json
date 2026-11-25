@@ -1,0 +1,106 @@
+{
+  "params": {
+    "window_h": 6,
+    "weights": {
+      "signals": 0.3,
+      "campaign": 0.2,
+      "hotline": 0.2,
+      "backlog": 0.2,
+      "disorder": 0.1
+    },
+    "caps": {
+      "signals": 12.0,
+      "campaign": 60.0,
+      "hotline": 2.0,
+      "backlog": 25.0,
+      "disorder": 5.0
+    },
+    "thresholds": {
+      "county_signal": 1,
+      "voiv_kizs": 45,
+      "voiv_hours": 2,
+      "minister_campaign_24h": 150,
+      "minister_voiv_24h": 8,
+      "rzzk_campaign_24h": 400,
+      "rzzk_voiv_24h": 12,
+      "rzzk_extra": 1
+    }
+  },
+  "first_campaign_flagged_report_ts": "2026-10-07 11:04:38+02:00",
+  "first_voivodeship_recommendation_ts": "2026-10-09 08:00:00+02:00",
+  "first_minister_recommendation_ts": "2026-10-08 09:00:00+02:00",
+  "first_rzzk_recommendation_ts": "2026-10-08 20:00:00+02:00",
+  "scenario_rzzk_convened_ts": "2026-10-09 14:00:00+02:00",
+  "rzzk_recommendation_lead_min": 1080.0,
+  "minister_recommendation_lead_min": 1450.0,
+  "voivodeship_recommendation_lead_min": -250.0,
+  "minutes_first_campaign_report_to_rzzk_recommendation": 1975.0,
+  "bs4826_to_rzzk_recommendation_min": -761.0,
+  "rzzk_threshold_sensitivity": [
+    {
+      "rzzk_campaign_24h_threshold": 200,
+      "recommend_ts": "2026-10-08 10:00:00+02:00",
+      "lead_before_rzzk_convened_min": 1680.0
+    },
+    {
+      "rzzk_campaign_24h_threshold": 300,
+      "recommend_ts": "2026-10-08 18:00:00+02:00",
+      "lead_before_rzzk_convened_min": 1200.0
+    },
+    {
+      "rzzk_campaign_24h_threshold": 400,
+      "recommend_ts": "2026-10-08 20:00:00+02:00",
+      "lead_before_rzzk_convened_min": 1080.0
+    },
+    {
+      "rzzk_campaign_24h_threshold": 600,
+      "recommend_ts": "2026-10-09 05:00:00+02:00",
+      "lead_before_rzzk_convened_min": 540.0
+    },
+    {
+      "rzzk_campaign_24h_threshold": 800,
+      "recommend_ts": "2026-10-09 07:00:00+02:00",
+      "lead_before_rzzk_convened_min": 420.0
+    }
+  ],
+  "voivodeships_with_recommendation": 6,
+  "kizs_national_max_mean": 42.0,
+  "kizs_peak_hour": "2026-10-09 12:00:00+02:00",
+  "kizs_top_voivodeship_peak": {
+    "voivodeship_name": "mazowieckie",
+    "hour": "2026-10-09 11:00:00+02:00",
+    "kizs": "77.4"
+  },
+  "county_kizs_top_d0": [
+    {
+      "county_code": "1405",
+      "genuine_signals": 1,
+      "campaign_reports": 15,
+      "county_kizs": 80.9
+    },
+    {
+      "county_code": "1406",
+      "genuine_signals": 1,
+      "campaign_reports": 8,
+      "county_kizs": 74.6
+    },
+    {
+      "county_code": "1402",
+      "genuine_signals": 2,
+      "campaign_reports": 35,
+      "county_kizs": 64.8
+    },
+    {
+      "county_code": "1404",
+      "genuine_signals": 1,
+      "campaign_reports": 24,
+      "county_kizs": 63.1
+    },
+    {
+      "county_code": "1427",
+      "genuine_signals": 1,
+      "campaign_reports": 21,
+      "county_kizs": 53.3
+    }
+  ]
+}

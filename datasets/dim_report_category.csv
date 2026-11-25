@@ -1,0 +1,7 @@
+category_code,category_name,tile_order
+BRON,Niebezpieczne narzędzie lub broń,1
+GROZBY,Groźby lub zapowiedź ataku,2
+TRESCI_SIEC,Niepokojące treści w sieci,3
+PRZEMOC,Przemoc lub nękanie,4
+SAMOUSZKODZENIE,Ktoś może zrobić sobie krzywdę,5
+INNE,Inne zagrożenie,6

@@ -1,0 +1,193 @@
+{
+  "params": {
+    "patrol_dedicated_share": 0.15,
+    "peak_window_start_h": 7,
+    "peak_window_end_h": 12,
+    "daytime_h": 12,
+    "ped_case_minutes": 60,
+    "support_productive_min_per_fte": 300,
+    "support_dedicated_share": 0.25,
+    "transfer_efficiency": 0.7,
+    "donor_max_share": 0.5,
+    "reserve_team_minutes": 360,
+    "reserve_teams_used": 100
+  },
+  "patrol_d0": {
+    "date": "2026-10-09",
+    "demand_status_quo_min": 24094.0,
+    "coverage_status_quo": 0.9486,
+    "deficit_counties_status_quo": "13",
+    "unmet_status_quo_min": 1237.25,
+    "coverage_after_reallocation": 1.0,
+    "deficit_counties_after_reallocation": "0",
+    "unmet_after_reallocation_min": 0.0,
+    "demand_after_filter_min": 944.0,
+    "coverage_after_filter_and_reallocation": 1.0,
+    "deficit_counties_after_filter": "0",
+    "unmet_after_filter_min": 0.0
+  },
+  "support_d0": {
+    "date": "2026-10-09",
+    "cases": "144",
+    "demand_min": 8640.0,
+    "coverage_status_quo": 1.0,
+    "deficit_counties_status_quo": "0",
+    "coverage_after_reallocation": 1.0,
+    "deficit_counties_after": "0"
+  },
+  "patrol_sensitivity_d0": [
+    {
+      "dedicated_share": 0.03,
+      "reserve_teams": 0,
+      "coverage_status_quo": 0.3773,
+      "deficit_counties_status_quo": 73,
+      "coverage_reallocation": 0.5564,
+      "deficit_counties_reallocation": 48,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.03,
+      "reserve_teams": 50,
+      "coverage_status_quo": 0.3773,
+      "deficit_counties_status_quo": 73,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.03,
+      "reserve_teams": 100,
+      "coverage_status_quo": 0.3773,
+      "deficit_counties_status_quo": 73,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.05,
+      "reserve_teams": 0,
+      "coverage_status_quo": 0.5546,
+      "deficit_counties_status_quo": 51,
+      "coverage_reallocation": 0.768,
+      "deficit_counties_reallocation": 30,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.05,
+      "reserve_teams": 50,
+      "coverage_status_quo": 0.5546,
+      "deficit_counties_status_quo": 51,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.05,
+      "reserve_teams": 100,
+      "coverage_status_quo": 0.5546,
+      "deficit_counties_status_quo": 51,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.1,
+      "reserve_teams": 0,
+      "coverage_status_quo": 0.8445,
+      "deficit_counties_status_quo": 24,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.1,
+      "reserve_teams": 50,
+      "coverage_status_quo": 0.8445,
+      "deficit_counties_status_quo": 24,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.1,
+      "reserve_teams": 100,
+      "coverage_status_quo": 0.8445,
+      "deficit_counties_status_quo": 24,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.15,
+      "reserve_teams": 0,
+      "coverage_status_quo": 0.9486,
+      "deficit_counties_status_quo": 13,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.15,
+      "reserve_teams": 50,
+      "coverage_status_quo": 0.9486,
+      "deficit_counties_status_quo": 13,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    },
+    {
+      "dedicated_share": 0.15,
+      "reserve_teams": 100,
+      "coverage_status_quo": 0.9486,
+      "deficit_counties_status_quo": 13,
+      "coverage_reallocation": 1.0,
+      "deficit_counties_reallocation": 0,
+      "coverage_filter_reallocation": 1.0
+    }
+  ],
+  "patrol_minutes_total": 84392.0,
+  "patrol_minutes_on_campaign_related": 73183.0,
+  "patrol_minutes_campaign_share": 0.8672,
+  "top_patrol_deficit_d0": [
+    {
+      "county_name": "Miasto M-2401",
+      "voivodeship_code": "24",
+      "dem_status_quo": 1303.0,
+      "cap_patrol": 1008.0,
+      "deficit_before_min": 295.0,
+      "deficit_after_min": 0.0
+    },
+    {
+      "county_name": "powiat P-1013",
+      "voivodeship_code": "10",
+      "dem_status_quo": 393.0,
+      "cap_patrol": 158.0,
+      "deficit_before_min": 236.0,
+      "deficit_after_min": 0.0
+    },
+    {
+      "county_name": "powiat P-2421",
+      "voivodeship_code": "24",
+      "dem_status_quo": 604.0,
+      "cap_patrol": 410.0,
+      "deficit_before_min": 194.0,
+      "deficit_after_min": 0.0
+    },
+    {
+      "county_name": "Miasto M-1403",
+      "voivodeship_code": "14",
+      "dem_status_quo": 438.0,
+      "cap_patrol": 284.0,
+      "deficit_before_min": 154.0,
+      "deficit_after_min": 0.0
+    },
+    {
+      "county_name": "powiat P-0217",
+      "voivodeship_code": "02",
+      "dem_status_quo": 470.0,
+      "cap_patrol": 346.0,
+      "deficit_before_min": 124.0,
+      "deficit_after_min": 0.0
+    }
+  ]
+}
